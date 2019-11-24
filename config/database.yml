@@ -5,15 +5,17 @@ default: &default
 
 development:
   <<: *default
+  host: postgres
   database: onebittweet_api_development
   username: postgres
-  password:
+  password: postgres
 
 test:
   <<: *default
+  host: postgres
   database: onebittweet_api_test
   username: postgres
-  password:
+  password: postgres
 
 production:
   <<: *default
