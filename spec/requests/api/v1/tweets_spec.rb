@@ -102,4 +102,92 @@ RSpec.describe "Api::V1::Tweets", type: :request do
       it { expect(response).to have_http_status(:not_found) }
     end
   end
+
+  describe 'POST /api/v1/tweets' do
+    context 'Unauthenticated' do
+      it_behaves_like :deny_without_authorization, :post, '/api/v1/users/-1'
+    end
+
+    context 'Authenticated' do
+      let(:user) { create(:user) }
+
+      context 'Valid params' do
+        context 'regular tweet' do
+          let(:tweet_params) { attributes_for(:tweet) }
+
+          it 'return created' do
+            post '/api/v1/tweets/',
+                 params: { tweet: tweet_params },
+                 headers: header_with_authentication(user)
+            expect(response).to have_http_status(:created)
+          end
+
+          it 'returns right tweet in json' do
+            post '/api/v1/tweets/',
+                 params: { tweet: tweet_params },
+                 headers: header_with_authentication(user)
+            expect(json).to include_json(tweet_params)
+          end
+
+          it 'create tweet' do
+            expect do
+              post '/api/v1/tweets/',
+                   params: { tweet: tweet_params },
+                   headers: header_with_authentication(user)
+            end.to change { Tweet.count }.by(1)
+          end
+        end
+
+        context 'retweet' do
+          before { @tweet_original = create(:tweet) }
+          let(:tweet_params) do
+            attributes_for(:tweet, tweet_original_id: @tweet_original.id)
+          end
+
+          it 'return created' do
+            post '/api/v1/tweets/',
+                 params: { tweet: tweet_params },
+                 headers: header_with_authentication(user)
+            expect(response).to have_http_status(:created)
+          end
+
+          it 'returns tweet in json' do
+            post '/api/v1/tweets/',
+                 params: { tweet: tweet_params },
+                 headers: header_with_authentication(user)
+            expect(json).to include_json(tweet_params)
+          end
+
+          it 'returns original tweet in json' do
+            post '/api/v1/tweets/',
+                 params: { tweet: tweet_params },
+                 headers: header_with_authentication(user)
+            expect(json['tweet_original']).to eql(
+              serialized(Api::V1::TweetSerializer, @tweet_original)
+            )
+          end
+
+          it 'create tweet' do
+            expect do
+              post '/api/v1/tweets/',
+                   params: { tweet: tweet_params },
+                   headers: header_with_authentication(user)
+            end.to change { Tweet.count }.by(1)
+          end
+        end
+      end
+
+      context 'Invalid params' do
+        let(:tweet_params) { {foo: :bar} }
+
+        before do
+          post '/api/v1/tweets/',
+               params: { tweet: tweet_params },
+               headers: header_with_authentication(user)
+        end
+
+        it { expect(response).to have_http_status(:unprocessable_entity) }
+      end
+    end
+  end
 end
