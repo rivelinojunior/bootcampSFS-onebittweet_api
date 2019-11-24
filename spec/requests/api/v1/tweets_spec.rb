@@ -229,4 +229,48 @@ RSpec.describe "Api::V1::Tweets", type: :request do
       end
     end
   end
+
+  describe 'PUT /api/v1/tweets/:tweet_id' do
+    context 'Unauthenticated' do
+      it_behaves_like :deny_without_authorization, :put, '/api/v1/users/-1'
+    end
+
+    context 'Authenticated' do
+      context 'Resource owner' do
+        let(:user) { create(:user) }
+        let(:tweet) { create(:tweet, user: user) }
+        let(:tweet_params) { attributes_for(:tweet) }
+
+        before do
+          put "/api/v1/tweets/#{tweet.id}",
+              params: { tweet: tweet_params },
+              headers: header_with_authentication(user)
+        end
+
+        it { expect(response).to have_http_status(:success) }
+
+        it 'returns tweet updated in json' do
+          put '/api/v1/tweets/',
+              params: { tweet: tweet_params },
+              headers: header_with_authentication(user)
+          expect(json).to include_json(tweet_params)
+        end
+      end
+
+      context 'Not resource owner' do
+        let(:user) { create(:user) }
+        let(:other_user) { create(:user) }
+        let(:tweet) { create(:tweet, user: other_user) }
+        let(:tweet_params) { attributes_for(:tweet) }
+
+        before do
+          put "/api/v1/tweets/#{tweet.id}",
+              params: { tweet: tweet_params },
+              headers: header_with_authentication(user)
+        end
+
+        it { expect(response).to have_http_status(:forbidden) }
+      end
+    end
+  end
 end
