@@ -105,7 +105,7 @@ RSpec.describe "Api::V1::Tweets", type: :request do
 
   describe 'POST /api/v1/tweets' do
     context 'Unauthenticated' do
-      it_behaves_like :deny_without_authorization, :post, '/api/v1/users/-1'
+      it_behaves_like :deny_without_authorization, :post, '/api/v1/tweets'
     end
 
     context 'Authenticated' do
@@ -116,7 +116,7 @@ RSpec.describe "Api::V1::Tweets", type: :request do
           let(:tweet_params) { attributes_for(:tweet) }
 
           it 'return created' do
-            post '/api/v1/tweets/',
+            post '/api/v1/tweets',
                  params: { tweet: tweet_params },
                  headers: header_with_authentication(user)
             expect(response).to have_http_status(:created)
@@ -250,9 +250,6 @@ RSpec.describe "Api::V1::Tweets", type: :request do
         it { expect(response).to have_http_status(:success) }
 
         it 'returns tweet updated in json' do
-          put '/api/v1/tweets/',
-              params: { tweet: tweet_params },
-              headers: header_with_authentication(user)
           expect(json).to include_json(tweet_params)
         end
       end
