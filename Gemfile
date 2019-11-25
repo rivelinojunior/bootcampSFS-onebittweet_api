@@ -21,6 +21,7 @@ gem 'rack-cors'
 gem 'rails', '~> 5.2.3'
 gem 'redis', '~> 4.0'
 gem 'searchkick'
+gem 'sidekiq-scheduler'
 gem 'whenever', require: false
 gem 'will_paginate', '~> 3.1.0'
 
