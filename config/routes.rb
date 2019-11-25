@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
+      get 'timeline/index'
       post 'user_token', to: 'user_token#create'
       resources :follows, only: %i[create destroy]
       resources :tweets, only: %i[index show create update destroy] do
