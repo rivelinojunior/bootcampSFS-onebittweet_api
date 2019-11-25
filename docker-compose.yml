@@ -36,7 +36,20 @@ services:
       - elastic:/usr/share/elasticsearch/data
     environment:
       - Des.network.host=0.0.0.0
- 
+  jobs:
+    depends_on:
+      - "postgres"
+      - "redis"
+      - "app"
+      - "elasticsearch"
+    build: .
+    command: bash start_jobs.sh
+    volumes:
+      - .:/onebittwitter
+      - app-gems:/app-gems
+    environment:
+      ELASTICSEARCH_URL: elasticsearch:9200
+
 volumes:
   redis:
   postgres:
