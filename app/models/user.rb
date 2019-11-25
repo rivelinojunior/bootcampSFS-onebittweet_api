@@ -8,9 +8,13 @@ class User < ApplicationRecord
 
   validates_presence_of :name, :email
 
-
   acts_as_voter
   acts_as_followable
   acts_as_follower
   has_many :tweets, dependent: :destroy
+
+  def timeline
+    users_ids = [id] + (all_following.pluck(:id) || [])
+    Tweet.where(user_id: users_ids).order(created_at: :desc)
+  end
 end
