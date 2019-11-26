@@ -5,6 +5,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      get 'trending', to: 'trending#index'
       get 'search/index'
       get 'search/autocomplete'
       get 'timeline/index'
