@@ -16,6 +16,7 @@ module Api
         @tweet = Tweet.new tweet_params
 
         if @tweet.save
+          AddHashtagsJob.perform_later(@tweet.body)
           render json: @tweet, status: :created
         else
           render json: @tweet.errors, status: :unprocessable_entity
